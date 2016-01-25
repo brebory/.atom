@@ -1,0 +1,124 @@
+(function() {
+  var $, CommandOutputView, CommandRunner, Editor;
+
+  Editor = require('atom').Editor;
+
+  $ = require('atom-space-pen-views').$;
+
+  CommandRunner = require('../lib/command-runner');
+
+  CommandOutputView = require('../lib/command-output-view');
+
+  describe("CommandOutputView", function() {
+    beforeEach(function() {
+      return this.runner = new CommandRunner();
+    });
+    describe("running a command", function() {
+      it("shows itself", function() {
+        var commandHandler, view;
+        commandHandler = null;
+        spyOn(this.runner, 'onCommand').andCallFake(function(handler) {
+          return commandHandler = handler;
+        });
+        view = new CommandOutputView(this.runner);
+        spyOn(view, 'show');
+        commandHandler('echo "foo"');
+        return expect(view.show).toHaveBeenCalled();
+      });
+      it("displays the command", function() {
+        var commandHandler, view;
+        commandHandler = null;
+        spyOn(this.runner, 'onCommand').andCallFake(function(handler) {
+          return commandHandler = handler;
+        });
+        view = new CommandOutputView(this.runner);
+        commandHandler('echo "foo"');
+        return expect(view.header.text()).toEqual('echo "foo"');
+      });
+      it("displays the command's output", function() {
+        var dataHandler, view;
+        dataHandler = null;
+        spyOn(this.runner, 'onData').andCallFake(function(handler) {
+          return dataHandler = handler;
+        });
+        view = new CommandOutputView(this.runner);
+        dataHandler('foo\n');
+        dataHandler('bar\n');
+        return expect(view.output.text()).toEqual('foo\nbar\n');
+      });
+      it("displays the last command's exit code", function() {
+        var exitHandler, view;
+        exitHandler = null;
+        spyOn(this.runner, 'onExit').andCallFake(function(handler) {
+          return exitHandler = handler;
+        });
+        view = new CommandOutputView(this.runner);
+        exitHandler();
+        return expect(view.output.text()).toMatch(/^\s*Command exited\s*$/);
+      });
+      it("displays the last command's kill signal", function() {
+        var killHandler, view;
+        killHandler = null;
+        spyOn(this.runner, 'onKill').andCallFake(function(handler) {
+          return killHandler = handler;
+        });
+        view = new CommandOutputView(this.runner);
+        killHandler('SIGKILL');
+        return expect(view.output.text()).toMatch(/SIGKILL/);
+      });
+      return it("clears the last command's output", function() {
+        var commandHandler, dataHandler, view, _ref;
+        _ref = [null, null], commandHandler = _ref[0], dataHandler = _ref[1];
+        spyOn(this.runner, 'onCommand').andCallFake(function(handler) {
+          return commandHandler = handler;
+        });
+        spyOn(this.runner, 'onData').andCallFake(function(handler) {
+          return dataHandler = handler;
+        });
+        view = new CommandOutputView(this.runner);
+        commandHandler('echo "foo"; echo "bar"');
+        dataHandler('foo\nbar\n');
+        expect(view.output.text()).toEqual('foo\nbar\n');
+        commandHandler('echo "baz"');
+        dataHandler('baz\n');
+        return expect(view.output.text()).toEqual('baz\n');
+      });
+    });
+    return describe("displaying a command's output", function() {
+      it("stays locked to the bottom of the output area", function() {
+        var view;
+        view = new CommandOutputView(this.runner);
+        spyOn(view, 'atBottomOfOutput').andReturn(true);
+        spyOn(view, 'scrollToBottomOfOutput');
+        view.addOutput('foo');
+        return expect(view.scrollToBottomOfOutput).toHaveBeenCalled();
+      });
+      it("unlocks from the bottom of the output area when scrolling up", function() {
+        var view;
+        view = new CommandOutputView(this.runner);
+        spyOn(view, 'atBottomOfOutput').andReturn(false);
+        spyOn(view, 'scrollToBottomOfOutput');
+        view.addOutput('foo');
+        return expect(view.scrollToBottomOfOutput).not.toHaveBeenCalled();
+      });
+      return it("colorizes the command's output", function() {
+        var dataHandler, view;
+        dataHandler = null;
+        spyOn(this.runner, 'onData').andCallFake(function(handler) {
+          return dataHandler = handler;
+        });
+        view = new CommandOutputView(this.runner);
+        dataHandler('\x1B[31mHello, \x1B[40mwro\x1B[;;;ml\x1B[md\x1B[0m!\n');
+        expect(view.output.text()).toEqual('Hello, wrold!\n');
+        expect($('.ansi-fg-red', view.output).text()).toEqual('Hello, wro');
+        expect($('.ansi-bg-black', view.output).text()).toEqual('wro');
+        return expect($('.ansi-fg-default.ansi-bg-default', view.output).text()).toEqual('ld!\n');
+      });
+    });
+  });
+
+}).call(this);
+
+//# sourceMappingURL=data:application/json;base64,ewogICJ2ZXJzaW9uIjogMywKICAiZmlsZSI6ICIiLAogICJzb3VyY2VSb290IjogIiIsCiAgInNvdXJjZXMiOiBbCiAgICAiL1VzZXJzL2Jyb2JlcnRvLy5hdG9tL3BhY2thZ2VzL3J1bi1jb21tYW5kL3NwZWMvY29tbWFuZC1vdXRwdXQtdmlldy1zcGVjLmNvZmZlZSIKICBdLAogICJuYW1lcyI6IFtdLAogICJtYXBwaW5ncyI6ICJBQUFBO0FBQUEsTUFBQSwyQ0FBQTs7QUFBQSxFQUFDLFNBQVUsT0FBQSxDQUFRLE1BQVIsRUFBVixNQUFELENBQUE7O0FBQUEsRUFDQyxJQUFLLE9BQUEsQ0FBUSxzQkFBUixFQUFMLENBREQsQ0FBQTs7QUFBQSxFQUVBLGFBQUEsR0FBZ0IsT0FBQSxDQUFRLHVCQUFSLENBRmhCLENBQUE7O0FBQUEsRUFHQSxpQkFBQSxHQUFvQixPQUFBLENBQVEsNEJBQVIsQ0FIcEIsQ0FBQTs7QUFBQSxFQUtBLFFBQUEsQ0FBUyxtQkFBVCxFQUE4QixTQUFBLEdBQUE7QUFDNUIsSUFBQSxVQUFBLENBQVcsU0FBQSxHQUFBO2FBQ1QsSUFBQyxDQUFBLE1BQUQsR0FBYyxJQUFBLGFBQUEsQ0FBQSxFQURMO0lBQUEsQ0FBWCxDQUFBLENBQUE7QUFBQSxJQUdBLFFBQUEsQ0FBUyxtQkFBVCxFQUE4QixTQUFBLEdBQUE7QUFDNUIsTUFBQSxFQUFBLENBQUcsY0FBSCxFQUFtQixTQUFBLEdBQUE7QUFDakIsWUFBQSxvQkFBQTtBQUFBLFFBQUEsY0FBQSxHQUFpQixJQUFqQixDQUFBO0FBQUEsUUFDQSxLQUFBLENBQU0sSUFBQyxDQUFBLE1BQVAsRUFBZSxXQUFmLENBQTJCLENBQUMsV0FBNUIsQ0FBd0MsU0FBQyxPQUFELEdBQUE7aUJBQ3RDLGNBQUEsR0FBaUIsUUFEcUI7UUFBQSxDQUF4QyxDQURBLENBQUE7QUFBQSxRQUlBLElBQUEsR0FBVyxJQUFBLGlCQUFBLENBQWtCLElBQUMsQ0FBQSxNQUFuQixDQUpYLENBQUE7QUFBQSxRQUtBLEtBQUEsQ0FBTSxJQUFOLEVBQVksTUFBWixD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
+
+//# sourceURL=/Users/broberto/.atom/packages/run-command/spec/command-output-view-spec.coffee
