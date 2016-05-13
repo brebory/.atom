@@ -1,0 +1,133 @@
+(function() {
+  var BufferedProcess, CommandRunner, CompositeDisposable, Emitter, path, pty, _ref;
+
+  _ref = require('atom'), BufferedProcess = _ref.BufferedProcess, Emitter = _ref.Emitter, CompositeDisposable = _ref.CompositeDisposable;
+
+  path = require('path');
+
+  pty = require('pty.js');
+
+  module.exports = CommandRunner = (function() {
+    function CommandRunner() {
+      this.running = false;
+      this.subscriptions = new CompositeDisposable();
+      this.emitter = new Emitter();
+    }
+
+    CommandRunner.prototype.spawnProcess = function(command) {
+      var args, shell, useLogin;
+      this.running = true;
+      shell = atom.config.get('run-command.shellCommand') || '/bin/bash';
+      useLogin = atom.config.get('run-command.useLoginShell');
+      args = ['-c', command];
+      if (useLogin) {
+        args = ['-l'].concat(args);
+      }
+      this.term = pty.spawn(shell, ['-c', command], {
+        name: 'xterm-color',
+        cwd: this.constructor.workingDirectory(),
+        env: process.env
+      });
+      this.term.on('data', (function(_this) {
+        return function(data) {
+          return _this.emitter.emit('data', data);
+        };
+      })(this));
+      this.term.on('exit', (function(_this) {
+        return function() {
+          _this.running = false;
+          return _this.emitter.emit('exit');
+        };
+      })(this));
+      return this.term.on('close', (function(_this) {
+        return function() {
+          _this.running = false;
+          return _this.emitter.emit('close');
+        };
+      })(this));
+    };
+
+    CommandRunner.homeDirectory = function() {
+      return process.env['HOME'] || process.env['USERPROFILE'] || '/';
+    };
+
+    CommandRunner.workingDirectory = function() {
+      var activePath, editor, relative, _ref1;
+      editor = atom.workspace.getActiveTextEditor();
+      activePath = editor != null ? editor.getPath() : void 0;
+      relative = atom.project.relativizePath(activePath);
+      if (activePath != null) {
+        return relative[0] || path.dirname(activePath);
+      } else {
+        return ((_ref1 = atom.project.getPaths()) != null ? _ref1[0] : void 0) || this.homeDirectory();
+      }
+    };
+
+    CommandRunner.prototype.onCommand = function(handler) {
+      return this.emitter.on('command', handler);
+    };
+
+    CommandRunner.prototype.onData = function(handler) {
+      return this.emitter.on('data', handler);
+    };
+
+    CommandRunner.prototype.onExit = function(handler) {
+      return this.emitter.on('exit', handler);
+    };
+
+    CommandRunner.prototype.onKill = function(handler) {
+      return this.emitter.on('kill', handler);
+    };
+
+    CommandRunner.prototype.onClose = function(handler) {
+      return this.emitter.on('close', handler);
+    };
+
+    CommandRunner.prototype.run = function(command) {
+      return new Promise((function(_this) {
+        return function(resolve, reject) {
+          var result;
+          _this.kill();
+          _this.emitter.emit('command', command);
+          result = {
+            output: '',
+            exited: false,
+            signal: null
+          };
+          _this.spawnProcess(command);
+          _this.subscriptions.add(_this.onData(function(data) {
+            return result.output += data;
+          }));
+          _this.subscriptions.add(_this.onClose(function() {
+            result.exited = true;
+            return resolve(result);
+          }));
+          return _this.subscriptions.add(_this.onKill(function(signal) {
+            result.signal = signal;
+            return resolve(result);
+          }));
+        };
+      })(this));
+    };
+
+    CommandRunner.prototype.kill = function(signal) {
+      signal || (signal = 'SIGTERM');
+      if ((this.term != null) && this.running) {
+        this.emitter.emit('kill', signal);
+        process.kill(this.term.pid, signal);
+        this.term.destroy();
+        this.term = null;
+        this.subscriptions.dispose();
+        return this.subscriptions.clear();
+      }
+    };
+
+    return CommandRunner;
+
+  })();
+
+}).call(this);
+
+//# sourceMappingURL=data:application/json;base64,ewogICJ2ZXJzaW9uIjogMywKICAiZmlsZSI6ICIiLAogICJzb3VyY2VSb290IjogIiIsCiAgInNvdXJjZXMiOiBbCiAgICAiL1VzZXJzL2Jyb2JlcnRvLy5hdG9tL3BhY2thZ2VzL3J1bi1jb21tYW5kL2xpYi9jb21tYW5kLXJ1bm5lci5jb2ZmZWUiCiAgXSwKICAibmFtZXMiOiBbXSwKICAibWFwcGluZ3MiOiAiQUFBQTtBQUFBLE1BQUEsNkVBQUE7O0FBQUEsRUFBQSxPQUFrRCxPQUFBLENBQVEsTUFBUixDQUFsRCxFQUFDLHVCQUFBLGVBQUQsRUFBa0IsZUFBQSxPQUFsQixFQUEyQiwyQkFBQSxtQkFBM0IsQ0FBQTs7QUFBQSxFQUNBLElBQUEsR0FBTyxPQUFBLENBQVEsTUFBUixDQURQLENBQUE7O0FBQUEsRUFFQSxHQUFBLEdBQU0sT0FBQSxDQUFRLFFBQVIsQ0FGTixDQUFBOztBQUFBLEVBSUEsTUFBTSxDQUFDLE9BQVAsR0FDTTtBQUNTLElBQUEsdUJBQUEsR0FBQTtBQUNYLE1BQUEsSUFBQyxDQUFBLE9BQUQsR0FBVyxLQUFYLENBQUE7QUFBQSxNQUNBLElBQUMsQ0FBQSxhQUFELEdBQXFCLElBQUEsbUJBQUEsQ0FBQSxDQURyQixDQUFBO0FBQUEsTUFFQSxJQUFDLENBQUEsT0FBRCxHQUFlLElBQUEsT0FBQSxDQUFBLENBRmYsQ0FEVztJQUFBLENBQWI7O0FBQUEsNEJBS0EsWUFBQSxHQUFjLFNBQUMsT0FBRCxHQUFBO0FBQ1osVUFBQSxxQkFBQTtBQUFBLE1BQUEsSUFBQyxDQUFBLE9BQUQsR0FBVyxJQUFYLENBQUE7QUFBQSxNQUVBLEtBQUEsR0FBUSxJQUFJLENBQUMsTUFBTSxDQUFDLEdBQVosQ0FBZ0IsMEJBQWhCLENBQUEsSUFBK0MsV0FGdkQsQ0FBQTtBQUFBLE1BR0EsUUFBQSxHQUFXLElBQUksQ0FBQyxNQUFNLENBQUMsR0FBWixDQUFnQiwyQkFBaEIsQ0FIWCxDQUFBO0FBQUEsTUFLQSxJQUFBLEdBQU8sQ0FBQyxJQUFELEVBQU8sT0FBUCxDQUxQLENBQUE7QUFNQSxNQUFB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
+
+//# sourceURL=/Users/broberto/.atom/packages/run-command/lib/command-runner.coffee

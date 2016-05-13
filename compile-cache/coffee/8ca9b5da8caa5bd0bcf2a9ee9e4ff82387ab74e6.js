@@ -1,0 +1,47 @@
+(function() {
+  var PugProvider, fs, path;
+
+  path = require('path');
+
+  fs = require('fs');
+
+  PugProvider = require('../lib/pug-provider');
+
+  describe("PugProvider", function() {
+    var provider;
+    provider = [][0];
+    beforeEach(function() {
+      return provider = new PugProvider;
+    });
+    return describe("transform", function() {
+      it("pug -> html", function() {
+        var htmlCode, pugCode;
+        pugCode = fs.readFileSync(path.join(__dirname, 'fixtures', 'sample.pug'), {
+          encoding: 'utf8'
+        });
+        htmlCode = fs.readFileSync(path.join(__dirname, 'fixtures', 'sample.html'), {
+          encoding: 'utf8'
+        });
+        return expect(provider.transform(pugCode).code.trim()).toEqual(htmlCode.trim());
+      });
+      return it("pug -> html with extends", function() {
+        var htmlCode, pugCode, pugFilePath;
+        pugFilePath = path.join(__dirname, 'fixtures', 'index.pug');
+        pugCode = fs.readFileSync(pugFilePath, {
+          encoding: 'utf8'
+        });
+        htmlCode = fs.readFileSync(path.join(__dirname, 'fixtures', 'index.html'), {
+          encoding: 'utf8'
+        });
+        return expect(provider.transform(pugCode, {
+          filePath: pugFilePath
+        }).code.trim()).toEqual(htmlCode.trim());
+      });
+    });
+  });
+
+}).call(this);
+
+//# sourceMappingURL=data:application/json;base64,ewogICJ2ZXJzaW9uIjogMywKICAiZmlsZSI6ICIiLAogICJzb3VyY2VSb290IjogIiIsCiAgInNvdXJjZXMiOiBbCiAgICAiL1VzZXJzL2Jyb2JlcnRvLy5hdG9tL3BhY2thZ2VzL3NvdXJjZS1wcmV2aWV3LXB1Zy9zcGVjL3B1Zy1wcm92aWRlci1zcGVjLmNvZmZlZSIKICBdLAogICJuYW1lcyI6IFtdLAogICJtYXBwaW5ncyI6ICJBQUFBO0FBQUEsTUFBQSxxQkFBQTs7QUFBQSxFQUFBLElBQUEsR0FBTyxPQUFBLENBQVEsTUFBUixDQUFQLENBQUE7O0FBQUEsRUFDQSxFQUFBLEdBQUssT0FBQSxDQUFRLElBQVIsQ0FETCxDQUFBOztBQUFBLEVBRUEsV0FBQSxHQUFjLE9BQUEsQ0FBUSxxQkFBUixDQUZkLENBQUE7O0FBQUEsRUFJQSxRQUFBLENBQVMsYUFBVCxFQUF3QixTQUFBLEdBQUE7QUFDdEIsUUFBQSxRQUFBO0FBQUEsSUFBQyxXQUFZLEtBQWIsQ0FBQTtBQUFBLElBRUEsVUFBQSxDQUFXLFNBQUEsR0FBQTthQUNULFFBQUEsR0FBVyxHQUFBLENBQUEsWUFERjtJQUFBLENBQVgsQ0FGQSxDQUFBO1dBS0EsUUFBQSxDQUFTLFdBQVQsRUFBc0IsU0FBQSxHQUFBO0FBQ3BCLE1BQUEsRUFBQSxDQUFHLGFBQUgsRUFBa0IsU0FBQSxHQUFBO0FBQ2hCLFlBQUEsaUJBQUE7QUFBQSxRQUFBLE9BQUEsR0FBVSxFQUFFLENBQUMsWUFBSCxDQUFnQixJQUFJLENBQUMsSUFBTCxDQUFVLFNBQVYsRUFBcUIsVUFBckIsRUFBaUMsWUFBakMsQ0FBaEIsRUFBZ0U7QUFBQSxVQUFBLFFBQUEsRUFBVSxNQUFWO1NBQWhFLENBQVYsQ0FBQTtBQUFBLFFBQ0EsUUFBQSxHQUFXLEVBQUUsQ0FBQyxZQUFILENBQWdCLElBQUksQ0FBQyxJQUFMLENBQVUsU0FBVixFQUFxQixVQUFyQixFQUFpQyxhQUFqQyxDQUFoQixFQUFpRTtBQUFBLFVBQUEsUUFBQSxFQUFVLE1BQVY7U0FBakUsQ0FEWCxDQUFBO2VBRUEsTUFBQSxDQUFPLFFBQVEsQ0FBQyxTQUFULENBQW1CLE9BQW5CLENBQTJCLENBQUMsSUFBSSxDQUFDLElBQWpDLENBQUEsQ0FBUCxDQUErQyxDQUFDLE9BQWhELENBQXdELFFBQVEsQ0FBQyxJQUFULENBQUEsQ0FBeEQsRUFIZ0I7TUFBQSxDQUFsQixDQUFBLENBQUE7YUFLQSxFQUFBLENBQUcsMEJBQUgsRUFBK0IsU0FBQSxHQUFBO0FBQzdCLFlBQUEsOEJBQUE7QUFBQSxRQUFBLFdBQUEsR0FBYyxJQUFJLENBQUMsSUFBTCxDQUFVLFNBQVYsRUFBcUIsVUFBckIsRUFBaUMsV0FBakMsQ0FBZCxDQUFBO0FBQUEsUUFDQSxPQUFBLEdBQVUsRUFBRSxDQUFDLFlBQUgsQ0FBZ0IsV0FBaEIsRUFBNkI7QUFBQSxVQUFBLFFBQUEsRUFBVSxNQUFWO1NBQTdCLENBRFYsQ0FBQTtBQUFBLFFBRUEsUUFBQSxHQUFXLEVBQUUsQ0FBQyxZQUFILENBQWdCLElBQUksQ0FBQyxJQUFMLENBQVUsU0FBVixFQUFxQixVQUFyQixFQUFpQyxZQUFqQyxDQUFoQixFQUFnRTtBQUFBLFVBQUEsUUFBQSxFQUFVLE1BQVY7U0FBaEUsQ0FGWCxDQUFBO2VBR0EsTUFBQSxDQUFPLFFBQVEsQ0FBQyxTQUFULENBQW1CLE9BQW5CLEVBQTRCO0FBQUEsVUFBQSxRQUFBLEVBQVUsV0FBVjtTQUE1QixDQUFrRCxDQUFDLElBQUksQ0FBQyxJQUF4RCxDQUFBLENBQVAsQ0FBc0UsQ0FBQyxPQUF2RSxDQUErRSxRQUFRLENBQUMsSUFBVCxDQUFBLENBQS9FLEVBSjZCO01BQUEsQ0FBL0IsRUFOb0I7SUFBQSxDQUF0QixFQU5zQjtFQUFBLENBQXhCLENBSkEsQ0FBQTtBQUFBIgp9
+
+//# sourceURL=/Users/broberto/.atom/packages/source-preview-pug/spec/pug-provider-spec.coffee
