@@ -4,6 +4,10 @@
       "one-dark-ui"
       "solarized-dark-syntax"
     ]
+    disabledPackages: [
+      "linter-rails-best-practices"
+      "ruby-navigator"
+    ]
   editor:
     invisibles: {}
     tabLength: 4
