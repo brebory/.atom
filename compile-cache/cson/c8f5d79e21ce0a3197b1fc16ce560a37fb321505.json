@@ -1,0 +1,1 @@
+{".source.js":{"Gulp taask":{"prefix":"gtask","body":"gulp.task('$1', '$2', function() {\n$3\n}"}}}
