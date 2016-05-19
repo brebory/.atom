@@ -35,8 +35,8 @@
   "homepage": "https://github.com/aki77/atom-source-preview-pug#readme",
   "_id": "source-preview-pug@0.2.0",
   "_shasum": "0d3ca3e91096b87059d7fcce1ac2519bbcb317ff",
-  "_resolved": "file:../d-116413-81692-vqfrd4/package.tgz",
-  "_from": "../d-116413-81692-vqfrd4/package.tgz",
+  "_resolved": "file:../d-116417-92976-9se51g/package.tgz",
+  "_from": "../d-116417-92976-9se51g/package.tgz",
   "_atomModuleCache": {
     "version": 1,
     "dependencies": [
@@ -577,7 +577,7 @@
       },
       {
         "name": "pug-lexer",
-        "version": "1.0.1",
+        "version": "1.2.0",
         "path": "node_modules/pug/node_modules/pug-lexer/index.js"
       },
       {

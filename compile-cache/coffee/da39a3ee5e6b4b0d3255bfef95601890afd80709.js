@@ -1,0 +1,8 @@
+(function() {
+
+
+}).call(this);
+
+//# sourceMappingURL=data:application/json;base64,ewogICJ2ZXJzaW9uIjogMywKICAiZmlsZSI6ICIiLAogICJzb3VyY2VSb290IjogIiIsCiAgInNvdXJjZXMiOiBbCiAgICAiL1VzZXJzL2Jyb2JlcnRvLy5hdG9tL3BhY2thZ2VzL25vZGUtZGVidWdnZXIvbGliL0NvbXBvbmVudHMvUmVzdGFydEJ1dHRvbi5jb2ZmZWUiCiAgXSwKICAibmFtZXMiOiBbXSwKICAibWFwcGluZ3MiOiAiQUFrSnVCO0FBQUE7QUFBQSIKfQ==
+
+//# sourceURL=/Users/broberto/.atom/packages/node-debugger/lib/Components/RestartButton.coffee
