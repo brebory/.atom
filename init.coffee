@@ -9,3 +9,18 @@
 # atom.workspace.observeTextEditors (editor) ->
 #   editor.onDidSave ->
 #     console.log "Saved! #{editor.getPath()}"
+
+# Ex mode
+
+dispatchCommand = (command) ->
+    workspaceView = atom.views.getView atom.workspace
+    atom.commands.dispatch workspaceView, command
+
+openCommandPalette = ->
+    dispatchCommand 'command-palette:toggle'
+
+atom.packages.onDidActivatePackage (pack) ->
+  if pack.name == 'ex-mode'
+    Ex = pack.mainModule.provideEx()
+    Ex.registerCommand 'p', ->
+        process.nextTick openCommandPalette
