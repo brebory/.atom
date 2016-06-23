@@ -19,8 +19,13 @@ dispatchCommand = (command) ->
 openCommandPalette = ->
     dispatchCommand 'command-palette:toggle'
 
+toggleMarkdownPreview = ->
+    dispatchCommand 'markdown-preview:toggle'
+
 atom.packages.onDidActivatePackage (pack) ->
   if pack.name == 'ex-mode'
     Ex = pack.mainModule.provideEx()
     Ex.registerCommand 'p', ->
         process.nextTick openCommandPalette
+    Ex.registerCommand 'md', ->
+        process.nextTick toggleMarkdownPreview
